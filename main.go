@@ -90,15 +90,8 @@ func (l LetterSet) Print() {
 
 	fmt.Println("Frequency Analysis:")
 
-	// Prepare to traverse our counts map alphabetically
-	keys := make([]string, 0, len(l.counts))
-	for r := range l.counts {
-		keys = append(keys, string(r))
-	}
-	sort.Strings(keys)
-
 	// Display our letter counts in alphabeticall order
-	for _, v := range keys {
+	for _, v := range l.Letters() {
 		letter := []rune(v)[0]
 		count := l.counts[letter]
 		percentage := float64(count) / float64(l.total)
@@ -107,6 +100,46 @@ func (l LetterSet) Print() {
 
 	// Display the total letter count
 	fmt.Printf("Total Letters: %v\n", l.total)
+	fmt.Printf("Most frequent: %v\n", l.MostCommonLetters())
+}
+
+// Letters returns a slice of strings containing the letters
+// in the LetterSet, sorted alphabetically
+func (l LetterSet) Letters() []string {
+	// Prepare to traverse our counts map alphabetically
+	keys := make([]string, 0, len(l.counts))
+	for r := range l.counts {
+		keys = append(keys, string(r))
+	}
+	sort.Strings(keys)
+
+	return keys
+}
+
+// MostCommonLetters returns a slice of strings containing
+// the letters with the highest frequency count in the
+// LetterSet, sorted alphabetically
+func (l LetterSet) MostCommonLetters() []string {
+	mostFrequent := []string{}
+	max := 0
+
+	// Find the highest frequency count
+	for _, count := range l.counts {
+		if count > max {
+			max = count
+		}
+	}
+
+	// Retrieve the letters with the highest count
+	for rune, count := range l.counts {
+		if count == max {
+			mostFrequent = append(mostFrequent, string(rune))
+		}
+	}
+
+	sort.Strings(mostFrequent)
+
+	return mostFrequent
 }
 
 // Empty indicates wether or not the letter set has any contents

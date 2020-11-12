@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -41,5 +42,27 @@ func TestCountLetters_NonAlphabetic(t *testing.T) {
 
 	if !ls.Empty() {
 		t.Error("Expected LetterSet to be empty")
+	}
+}
+
+func TestLetters(t *testing.T) {
+	sampleText := "GFEDCBAGFEDCBA"
+	expectedLetters := []string{"A", "B", "C", "D", "E", "F", "G"}
+	ls := NewLetterSet()
+	CountLetters(sampleText, &ls)
+
+	if !reflect.DeepEqual(ls.Letters(), expectedLetters) {
+		t.Errorf("Expected Letters() to return %v", expectedLetters)
+	}
+}
+
+func TestMostCommonLetters(t *testing.T) {
+	sampleText := "AAAABBBCCD"
+	expectedLetters := []string{"A"}
+	ls := NewLetterSet()
+	CountLetters(sampleText, &ls)
+
+	if !reflect.DeepEqual(ls.MostCommonLetters(), expectedLetters) {
+		t.Errorf("Expected Letters() to return %v", expectedLetters)
 	}
 }
