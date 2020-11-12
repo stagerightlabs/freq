@@ -16,14 +16,15 @@ func init() {
 
 func main() {
 	flag.Parse()
-	set := countLetters(text)
-	set.print()
+	ls := CountLetters(text)
+	ls.Print()
 }
 
-// Create a new frequency count for a given string
-func countLetters(text string) letterSet {
+// CountLetters returns a LetterSet containing a frequency
+// count for every letter that appears in the source text
+func CountLetters(text string) LetterSet {
 
-	ls := newLetterSet()
+	ls := NewLetterSet()
 	var char rune
 
 	for _, c := range text {
@@ -38,18 +39,19 @@ func countLetters(text string) letterSet {
 	return ls
 }
 
-// A letter set represents a completed frequency analysis
-type letterSet struct {
+// LetterSet represents a frequency count for a group of letters
+type LetterSet struct {
 	counts map[rune]int
 	total  int64
 }
 
-func newLetterSet() letterSet {
-	return letterSet{counts: make(map[rune]int), total: 0}
+// NewLetterSet returns an empty LetterSet
+func NewLetterSet() LetterSet {
+	return LetterSet{counts: make(map[rune]int), total: 0}
 }
 
-// Print a letterSet to the console
-func (l letterSet) print() {
+// Print a LetterSet to the console
+func (l LetterSet) Print() {
 
 	fmt.Println("Frequency Analysis:")
 
@@ -70,4 +72,9 @@ func (l letterSet) print() {
 
 	// Display the total letter count
 	fmt.Printf("Total: %v\n", l.total)
+}
+
+// Empty indicates wether or not the letter set has any contents
+func (l LetterSet) Empty() bool {
+	return len(l.counts) == 0
 }
