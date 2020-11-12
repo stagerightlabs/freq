@@ -14,15 +14,16 @@ func TestEmptyLetterSet(t *testing.T) {
 }
 
 func TestCountLetters_Alphabetic(t *testing.T) {
-	sampleText := "ABCDEFG"
-	ls := CountLetters(sampleText)
+	sampleText := "ABCDEFGABCDEFG"
+	ls := NewLetterSet()
+	CountLetters(sampleText, &ls)
 
 	if ls.Empty() {
 		t.Error("Expected LetterSet to have contents")
 	}
 
 	for _, letter := range sampleText {
-		if ls.counts[letter] != 1 {
+		if ls.counts[letter] != 2 {
 			t.Errorf("Expected letter %c to have a frequency count of 1", letter)
 		}
 	}
@@ -35,7 +36,8 @@ func TestCountLetters_Alphabetic(t *testing.T) {
 
 func TestCountLetters_NonAlphabetic(t *testing.T) {
 	sampleText := "123456789.,!@#$%&*();?"
-	ls := CountLetters(sampleText)
+	ls := NewLetterSet()
+	CountLetters(sampleText, &ls)
 
 	if !ls.Empty() {
 		t.Error("Expected LetterSet to be empty")

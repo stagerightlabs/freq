@@ -16,15 +16,15 @@ func init() {
 
 func main() {
 	flag.Parse()
-	ls := CountLetters(text)
+	ls := NewLetterSet()
+	CountLetters(text, &ls)
 	ls.Print()
 }
 
 // CountLetters returns a LetterSet containing a frequency
 // count for every letter that appears in the source text
-func CountLetters(text string) LetterSet {
+func CountLetters(text string, ls *LetterSet) {
 
-	ls := NewLetterSet()
 	var char rune
 
 	for _, c := range text {
@@ -35,8 +35,6 @@ func CountLetters(text string) LetterSet {
 			ls.total++
 		}
 	}
-
-	return ls
 }
 
 // LetterSet represents a frequency count for a group of letters
