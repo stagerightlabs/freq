@@ -3,21 +3,52 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"sort"
 	"unicode"
 )
 
-var text string
+func main() {
 
-func init() {
+	var text string
+	var file string
+
+	// Read flags
 	flag.StringVar(&text, "t", "", "Specify text to analyze")
 	flag.StringVar(&text, "text", "", "Specify text to analyze")
+	flag.StringVar(&file, "f", "", "Specify a file to read")
+	flag.StringVar(&file, "file", "", "Specify a file to read")
+	flag.Parse()
+
+	// Use the flag contents to determine our handler method
+	if len(file) > 0 {
+		AnalyzeFile(file)
+	} else if len(text) > 0 {
+		AnalyzeText(text)
+	} else {
+		fmt.Println("You did not specify any input.")
+	}
 }
 
-func main() {
-	flag.Parse()
+// AnalyzeText performs frequency analysis on a text string
+func AnalyzeText(text string) {
 	ls := NewLetterSet()
+	ls.text = text
 	CountLetters(text, &ls)
+	ls.Print()
+}
+
+// AnalyzeFile performs frequency analysis on the contents of a file
+func AnalyzeFile(file string) {
+	contents, err := ioutil.ReadFile(file)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	ls := NewLetterSet()
+	ls.file = file
+	CountLetters(string(contents), &ls)
 	ls.Print()
 }
 
@@ -41,6 +72,8 @@ func CountLetters(text string, ls *LetterSet) {
 type LetterSet struct {
 	counts map[rune]int
 	total  int64
+	text   string
+	file   string
 }
 
 // NewLetterSet returns an empty LetterSet
@@ -50,6 +83,10 @@ func NewLetterSet() LetterSet {
 
 // Print a LetterSet to the console
 func (l LetterSet) Print() {
+
+	if len(l.file) > 0 {
+		fmt.Println("File:", l.file)
+	}
 
 	fmt.Println("Frequency Analysis:")
 
@@ -69,7 +106,7 @@ func (l LetterSet) Print() {
 	}
 
 	// Display the total letter count
-	fmt.Printf("Total: %v\n", l.total)
+	fmt.Printf("Total Letters: %v\n", l.total)
 }
 
 // Empty indicates wether or not the letter set has any contents
