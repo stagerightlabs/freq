@@ -68,11 +68,15 @@ func AnalyzeFile(file string) {
 
 // Serve launches a web server to process API requests
 func Serve(host, port string) {
-	http.HandleFunc("/freq", apiFreqHandler)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/freq", apiFreqHandler)
+
 	server := &http.Server{
 		Addr:    fmt.Sprintf("%v:%v", host, port),
-		Handler: nil,
+		Handler: mux,
 	}
+
 	log.Printf("Listening on https://%v:%v", host, port)
 	log.Fatal(server.ListenAndServe())
 }
