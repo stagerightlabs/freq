@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"sort"
 	"unicode"
@@ -13,16 +16,27 @@ func main() {
 
 	var text string
 	var file string
+	var serve bool
+	var host string
+	var port string
 
 	// Read flags
 	flag.StringVar(&text, "t", "", "Specify text to analyze")
 	flag.StringVar(&text, "text", "", "Specify text to analyze")
 	flag.StringVar(&file, "f", "", "Specify a file to read")
 	flag.StringVar(&file, "file", "", "Specify a file to read")
+	flag.BoolVar(&serve, "s", false, "Launch the web server")
+	flag.BoolVar(&serve, "serve", false, "Launch the web server")
+	flag.StringVar(&host, "h", "0.0.0.0", "Specify the server host")
+	flag.StringVar(&host, "host", "0.0.0.0", "Specify the server host")
+	flag.StringVar(&port, "p", "80", "Specify the server port")
+	flag.StringVar(&port, "port", "80", "Specify the server port")
 	flag.Parse()
 
 	// Use the flag contents to determine our handler method
-	if len(file) > 0 {
+	if serve {
+		Serve(host, port)
+	} else if len(file) > 0 {
 		AnalyzeFile(file)
 	} else if len(text) > 0 {
 		AnalyzeText(text)
@@ -52,6 +66,33 @@ func AnalyzeFile(file string) {
 	ls.Print()
 }
 
+// Serve launches a web server to process API requests
+func Serve(host, port string) {
+	http.HandleFunc("/freq", apiFreqHandler)
+	server := &http.Server{
+		Addr:    fmt.Sprintf("%v:%v", host, port),
+		Handler: nil,
+	}
+	log.Printf("Listening on https://%v:%v", host, port)
+	log.Fatal(server.ListenAndServe())
+}
+
+// Handle an API request
+func apiFreqHandler(writer http.ResponseWriter, request *http.Request) {
+
+	ls := NewLetterSet()
+	CountLetters(request.FormValue("text"), &ls)
+	ls.text = request.FormValue("text")
+
+	writer.Header().Set("Content-Type", "application/json")
+	jsonData, err := ls.MarshalJSON()
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Fprint(writer, string(jsonData))
+}
+
 // CountLetters returns a LetterSet containing a frequency
 // count for every letter that appears in the source text
 func CountLetters(text string, ls *LetterSet) {
@@ -73,7 +114,7 @@ type LetterSet struct {
 	counts map[rune]int
 	total  int64
 	text   string
-	file   string
+	file   string `json:"-"`
 }
 
 // NewLetterSet returns an empty LetterSet
@@ -145,4 +186,28 @@ func (l LetterSet) MostCommonLetters() []string {
 // Empty indicates wether or not the letter set has any contents
 func (l LetterSet) Empty() bool {
 	return len(l.counts) == 0
+}
+
+// MarshalJSON converts a LetterSet to JSON
+func (l *LetterSet) MarshalJSON() ([]byte, error) {
+
+	counts := make(map[string]int)
+	total := 0
+
+	for r := range l.counts {
+		counts[string(r)] = l.counts[r]
+		total++
+	}
+
+	return json.Marshal(&struct {
+		Text         string         `json:"text"`
+		Counts       map[string]int `json:"counts"`
+		TotalLetters int            `json:"totalLetters"`
+		MostFrequent []string       `json:"mostFrequent"`
+	}{
+		Counts:       counts,
+		Text:         l.text,
+		TotalLetters: total,
+		MostFrequent: l.MostCommonLetters(),
+	})
 }

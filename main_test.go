@@ -2,7 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -64,5 +69,30 @@ func TestMostCommonLetters(t *testing.T) {
 
 	if !reflect.DeepEqual(ls.MostCommonLetters(), expectedLetters) {
 		t.Errorf("Expected Letters() to return %v", expectedLetters)
+	}
+}
+
+func TestApiFreqHandler(t *testing.T) {
+
+	// Simulate our POST form data
+	form := url.Values{}
+	form.Add("text", "GFEDCBAGFEDCBA")
+
+	// Simulate a request and attach the form to it
+	req, err := http.NewRequest("POST", "/freq", strings.NewReader(form.Encode()))
+	req.Form = form
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Simulate a response to receive the handler output
+	resp := httptest.NewRecorder()
+
+	// Call the handler we are testing
+	apiFreqHandler(resp, req)
+
+	// Check the response body
+	if resp.Body.String() != `{"text":"GFEDCBAGFEDCBA","counts":{"A":2,"B":2,"C":2,"D":2,"E":2,"F":2,"G":2},"totalLetters":7,"mostFrequent":["A","B","C","D","E","F","G"]}` {
+		t.Error("Received an invalid API response from /freq")
 	}
 }
