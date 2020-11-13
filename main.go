@@ -135,7 +135,7 @@ func (l LetterSet) Print() {
 
 	fmt.Println("Frequency Analysis:")
 
-	// Display our letter counts in alphabeticall order
+	// Display our letter counts in alphabetical order
 	for _, v := range l.Letters() {
 		letter := []rune(v)[0]
 		count := l.counts[letter]
