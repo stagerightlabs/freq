@@ -43,3 +43,15 @@ You can test the API response with curl:
 ```
 $ curl -X POST -id "text=You have power over your mind - not outside events. Realize this, and you will find strength. - Marcus Aurelius" localhost:8080/freq
 ```
+
+# Changes from Kurtis
+
+## Split code across files
+
+The namespacing (package) in go is awesome. If a file is in the same folder and has the same package name, then there's no need to import it, it'll be auto included by the compiler. I've split all your various functions out into their own files so that it's easier to see all the different functionality while looking at the code files.
+
+I pulled all the code related to LetterSet out into its own file, so now we can see the type and methods that this struct has.
+
+## Change exported vs. unexported
+
+If code is in the same package, and it doesn't need to work with any standard library packages, then there is no reason to have it be exported (start with a cap letter).
